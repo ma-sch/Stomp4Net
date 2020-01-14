@@ -1,0 +1,717 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Stomp4Net</name>
+    </assembly>
+    <members>
+        <member name="T:Stomp4Net.Model.Frames.AbortFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#ABORT">ABORT frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.AckFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#ACK">ACK frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.BeginFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#BEGIN">BEGIN frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.CommitFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#COMMIT">COMMIT frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.ConnectedFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#CONNECTED_Frame">CONNECTED frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.ConnectFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#CONNECT_or_STOMP_Frame">CONNECT frame</see>.
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Model.Frames.ConnectFrame.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Stomp4Net.Model.Frames.ConnectFrame"/> class.
+            </summary>
+            <param name="host">The name of a virtual host that the client wishes to connect to.
+            It is recommended clients set this to the host name that the socket was established against,
+            or to any name of their choosing. If this header does not match a known virtual host, servers
+            supporting virtual hosting MAY select a default virtual host or reject the connection.
+            </param>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.DisconnectFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#DISCONNECT">DISCONNECT frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.NackFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#NACK">NACK frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.SendFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#SEND">SEND frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.SubscribeFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#SUBSCRIBE">SUBSCRIBE frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.Frames.UnsubscribeFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#UNSUBSCRIBE">UNSUBSCRIBE frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.ErrorFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#ERROR">ERROR frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.MessageFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#MESSAGE">MESSAGE frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.ReceiptFrame">
+            <summary>
+            Stomp <see cref="!:https://stomp.github.io/stomp-specification-1.2.html#RECEIPT">RECEIPT frame</see>.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.StompHeaders">
+            <summary>
+            Headers for Stomp frames.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Model.SubscribeAckType">
+            <summary>
+            Acknowledgment types for Stomp subscriptions.
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Logging.ILog">
+            <summary>
+                Simple interface that represent a logger.
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Logging.ILog.Log(Stomp4Net.Logging.LogLevel,System.Func{System.String},System.Exception,System.Object[])">
+            <summary>
+                Log a message the specified log level.
+            </summary>
+            <param name="logLevel">The log level.</param>
+            <param name="messageFunc">The message function.</param>
+            <param name="exception">An optional exception.</param>
+            <param name="formatParameters">Optional format parameters for the message generated by the messagefunc. </param>
+            <returns>true if the message was logged. Otherwise false.</returns>
+            <remarks>
+                Note to implementers: the message func should not be called if the loglevel is not enabled
+                so as not to incur performance penalties.
+                To check IsEnabled call Log with only LogLevel and check the return value, no event will be written.
+            </remarks>
+        </member>
+        <member name="T:Stomp4Net.Logging.ILogProvider">
+            <summary>
+            Represents a way to get a <see cref="T:Stomp4Net.Logging.ILog"/>
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Logging.ILogProvider.GetLogger(System.String)">
+            <summary>
+            Gets the specified named logger.
+            </summary>
+            <param name="name">Name of the logger.</param>
+            <returns>The logger reference.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.ILogProvider.OpenNestedContext(System.String)">
+            <summary>
+            Opens a nested diagnostics context. Not supported in EntLib logging.
+            </summary>
+            <param name="message">The message to add to the diagnostics context.</param>
+            <returns>A disposable that when disposed removes the message from the context.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.ILogProvider.OpenMappedContext(System.String,System.Object,System.Boolean)">
+            <summary>
+            Opens a mapped diagnostics context. Not supported in EntLib logging.
+            </summary>
+            <param name="key">A key.</param>
+            <param name="value">A value.</param>
+            <param name="destructure">Determines whether to call the destructor or not.</param>
+            <returns>A disposable that when disposed removes the map from the context.</returns>
+        </member>
+        <member name="T:Stomp4Net.Logging.LogExtensions">
+            <summary>
+                Extension methods for the <see cref="T:Stomp4Net.Logging.ILog"/> interface.
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.IsDebugEnabled(Stomp4Net.Logging.ILog)">
+            <summary>
+                Check if the <see cref="F:Stomp4Net.Logging.LogLevel.Debug"/> log level is enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to check with.</param>
+            <returns>True if the log level is enabled; false otherwise.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.IsErrorEnabled(Stomp4Net.Logging.ILog)">
+            <summary>
+                Check if the <see cref="F:Stomp4Net.Logging.LogLevel.Error"/> log level is enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to check with.</param>
+            <returns>True if the log level is enabled; false otherwise.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.IsFatalEnabled(Stomp4Net.Logging.ILog)">
+            <summary>
+                Check if the <see cref="F:Stomp4Net.Logging.LogLevel.Fatal"/> log level is enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to check with.</param>
+            <returns>True if the log level is enabled; false otherwise.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.IsInfoEnabled(Stomp4Net.Logging.ILog)">
+            <summary>
+                Check if the <see cref="F:Stomp4Net.Logging.LogLevel.Info"/> log level is enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to check with.</param>
+            <returns>True if the log level is enabled; false otherwise.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.IsTraceEnabled(Stomp4Net.Logging.ILog)">
+            <summary>
+                Check if the <see cref="F:Stomp4Net.Logging.LogLevel.Trace"/> log level is enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to check with.</param>
+            <returns>True if the log level is enabled; false otherwise.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.IsWarnEnabled(Stomp4Net.Logging.ILog)">
+            <summary>
+                Check if the <see cref="F:Stomp4Net.Logging.LogLevel.Warn"/> log level is enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to check with.</param>
+            <returns>True if the log level is enabled; false otherwise.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Debug(Stomp4Net.Logging.ILog,System.Func{System.String})">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Debug"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="messageFunc">The message function.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Debug(Stomp4Net.Logging.ILog,System.String)">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Debug"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Debug(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Debug"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Debug(Stomp4Net.Logging.ILog,System.Exception,System.String,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Debug"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="exception">The exception.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.DebugFormat(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Debug"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.DebugException(Stomp4Net.Logging.ILog,System.String,System.Exception)">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Debug"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="exception">The exception.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.DebugException(Stomp4Net.Logging.ILog,System.String,System.Exception,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Debug"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="exception">The exception.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Error(Stomp4Net.Logging.ILog,System.Func{System.String})">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Error"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="messageFunc">The message function.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Error(Stomp4Net.Logging.ILog,System.String)">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Error"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Error(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Error"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Error(Stomp4Net.Logging.ILog,System.Exception,System.String,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Error"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="exception">The exception.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.ErrorFormat(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Error"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.ErrorException(Stomp4Net.Logging.ILog,System.String,System.Exception,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Error"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="exception">The exception.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Fatal(Stomp4Net.Logging.ILog,System.Func{System.String})">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Fatal"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="messageFunc">The message function.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Fatal(Stomp4Net.Logging.ILog,System.String)">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Fatal"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Fatal(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Fatal"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Fatal(Stomp4Net.Logging.ILog,System.Exception,System.String,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Fatal"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="exception">The exception.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.FatalFormat(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Fatal"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.FatalException(Stomp4Net.Logging.ILog,System.String,System.Exception,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Fatal"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="exception">The exception.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Info(Stomp4Net.Logging.ILog,System.Func{System.String})">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Info"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="messageFunc">The message function.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Info(Stomp4Net.Logging.ILog,System.String)">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Info"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Info(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Info"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Info(Stomp4Net.Logging.ILog,System.Exception,System.String,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Info"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="exception">The exception.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.InfoFormat(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Info"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.InfoException(Stomp4Net.Logging.ILog,System.String,System.Exception,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Info"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="exception">The exception.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Trace(Stomp4Net.Logging.ILog,System.Func{System.String})">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Trace"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="messageFunc">The message function.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Trace(Stomp4Net.Logging.ILog,System.String)">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Trace"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Trace(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Trace"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Trace(Stomp4Net.Logging.ILog,System.Exception,System.String,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Trace"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="exception">The exception.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.TraceFormat(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Trace"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.TraceException(Stomp4Net.Logging.ILog,System.String,System.Exception,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Trace"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="exception">The exception.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Warn(Stomp4Net.Logging.ILog,System.Func{System.String})">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Warn"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="messageFunc">The message function.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Warn(Stomp4Net.Logging.ILog,System.String)">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Warn"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Warn(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Warn"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.Warn(Stomp4Net.Logging.ILog,System.Exception,System.String,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Warn"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="exception">The exception.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.WarnFormat(Stomp4Net.Logging.ILog,System.String,System.Object[])">
+            <summary>
+                Logs a message at the <see cref="F:Stomp4Net.Logging.LogLevel.Warn"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogExtensions.WarnException(Stomp4Net.Logging.ILog,System.String,System.Exception,System.Object[])">
+            <summary>
+                Logs an exception at the <see cref="F:Stomp4Net.Logging.LogLevel.Warn"/> log level, if enabled.
+            </summary>
+            <param name="logger">The <see cref="T:Stomp4Net.Logging.ILog"/> to use.</param>
+            <param name="message">The message.</param>
+            <param name="exception">The exception.</param>
+            <param name="args">Optional format parameters for the message.</param>
+        </member>
+        <member name="T:Stomp4Net.Logging.LogLevel">
+            <summary>
+                The log level.
+            </summary>
+        </member>
+        <member name="F:Stomp4Net.Logging.LogLevel.Trace">
+            <summary>
+            Trace
+            </summary>
+        </member>
+        <member name="F:Stomp4Net.Logging.LogLevel.Debug">
+            <summary>
+            Debug
+            </summary>
+        </member>
+        <member name="F:Stomp4Net.Logging.LogLevel.Info">
+            <summary>
+            Info
+            </summary>
+        </member>
+        <member name="F:Stomp4Net.Logging.LogLevel.Warn">
+            <summary>
+            Warn
+            </summary>
+        </member>
+        <member name="F:Stomp4Net.Logging.LogLevel.Error">
+            <summary>
+            Error
+            </summary>
+        </member>
+        <member name="F:Stomp4Net.Logging.LogLevel.Fatal">
+            <summary>
+            Fatal
+            </summary>
+        </member>
+        <member name="T:Stomp4Net.Logging.LogProvider">
+            <summary>
+            Provides a mechanism to create instances of <see cref="T:Stomp4Net.Logging.ILog" /> objects.
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProvider.SetCurrentLogProvider(Stomp4Net.Logging.ILogProvider)">
+            <summary>
+            Sets the current log provider.
+            </summary>
+            <param name="logProvider">The log provider.</param>
+        </member>
+        <member name="P:Stomp4Net.Logging.LogProvider.IsDisabled">
+            <summary>
+            Gets or sets a value indicating whether this is logging is disabled.
+            </summary>
+            <value>
+            <c>true</c> if logging is disabled; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Stomp4Net.Logging.LogProvider.OnCurrentLogProviderSet">
+            <summary>
+            Sets an action that is invoked when a consumer of your library has called SetCurrentLogProvider. It is 
+            important that hook into this if you are using child libraries (especially ilmerged ones) that are using
+            LibLog (or other logging abstraction) so you adapt and delegate to them.
+            <see cref="M:Stomp4Net.Logging.LogProvider.SetCurrentLogProvider(Stomp4Net.Logging.ILogProvider)"/> 
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProvider.For``1">
+            <summary>
+            Gets a logger for the specified type.
+            </summary>
+            <typeparam name="T">The type whose name will be used for the logger.</typeparam>
+            <returns>An instance of <see cref="T:Stomp4Net.Logging.ILog"/></returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProvider.GetCurrentClassLogger">
+            <summary>
+            Gets a logger for the current class.
+            </summary>
+            <returns>An instance of <see cref="T:Stomp4Net.Logging.ILog"/></returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProvider.GetLogger(System.Type,System.String)">
+            <summary>
+            Gets a logger for the specified type.
+            </summary>
+            <param name="type">The type whose name will be used for the logger.</param>
+            <param name="fallbackTypeName">If the type is null then this name will be used as the log name instead</param>
+            <returns>An instance of <see cref="T:Stomp4Net.Logging.ILog"/></returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProvider.GetLogger(System.String)">
+            <summary>
+            Gets a logger with the specified name.
+            </summary>
+            <param name="name">The name.</param>
+            <returns>An instance of <see cref="T:Stomp4Net.Logging.ILog"/></returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProvider.OpenNestedContext(System.String)">
+            <summary>
+            Opens a nested diagnostics context.
+            </summary>
+            <param name="message">A message.</param>
+            <returns>An <see cref="T:System.IDisposable"/> that closes context when disposed.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProvider.OpenMappedContext(System.String,System.Object,System.Boolean)">
+            <summary>
+            Opens a mapped diagnostics context.
+            </summary>
+            <param name="key">A key.</param>
+            <param name="value">A value.</param>
+            <param name="destructure">A optional paramater to indicate message should be destructured.</param>
+            <returns>An <see cref="T:System.IDisposable"/> that closes context when disposed.</returns>
+        </member>
+        <member name="T:Stomp4Net.Logging.LogProviders.LibLogException">
+            <summary>
+            Exception thrown by LibLog.
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LibLogException.#ctor(System.String)">
+            <summary>
+            Initializes a new LibLogException with the specified message.
+            </summary>
+            <param name="message">The message</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LibLogException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new LibLogException with the specified message and inner exception.
+            </summary>
+            <param name="message">The message.</param>
+            <param name="inner">The inner exception.</param>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LogMessageFormatter.SimulateStructuredLogging(System.Func{System.String},System.Object[])">
+            <summary>
+                Some logging frameworks support structured logging, such as serilog. This will allow you to add names to structured
+                data in a format string:
+                For example: Log("Log message to {user}", user). This only works with serilog, but as the user of LibLog, you don't
+                know if serilog is actually
+                used. So, this class simulates that. it will replace any text in {curly braces} with an index number.
+                "Log {message} to {user}" would turn into => "Log {0} to {1}". Then the format parameters are handled using regular
+                .net string.Format.
+            </summary>
+            <param name="messageBuilder">The message builder.</param>
+            <param name="formatParameters">The format parameters.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Stomp4Net.Logging.LogProviders.LogProviderBase">
+            <summary>
+                Base class for specific log providers.
+            </summary>
+        </member>
+        <member name="F:Stomp4Net.Logging.LogProviders.LogProviderBase.ErrorInitializingProvider">
+            <summary>
+                Error message should initializing the log provider fail.
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LogProviderBase.#ctor">
+            <summary>
+                Initialize an instance of the <see cref="T:Stomp4Net.Logging.LogProviders.LogProviderBase"/> class by initializing the references
+                to the nested and mapped diagnostics context-obtaining functions.
+            </summary>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LogProviderBase.GetLogger(System.String)">
+            <summary>
+            Gets the specified named logger.
+            </summary>
+            <param name="name">Name of the logger.</param>
+            <returns>The logger reference.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LogProviderBase.OpenNestedContext(System.String)">
+            <summary>
+            Opens a nested diagnostics context. Not supported in EntLib logging.
+            </summary>
+            <param name="message">The message to add to the diagnostics context.</param>
+            <returns>A disposable that when disposed removes the message from the context.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LogProviderBase.OpenMappedContext(System.String,System.Object,System.Boolean)">
+            <summary>
+            Opens a mapped diagnostics context. Not supported in EntLib logging.
+            </summary>
+            <param name="key">A key.</param>
+            <param name="value">A value.</param>
+            <param name="destructure">Determines whether to call the destructor or not.</param>
+            <returns>A disposable that when disposed removes the map from the context.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LogProviderBase.GetOpenNdcMethod">
+            <summary>
+                Returns the provider-specific method to open a nested diagnostics context.
+            </summary>
+            <returns>A provider-specific method to open a nested diagnostics context.</returns>
+        </member>
+        <member name="M:Stomp4Net.Logging.LogProviders.LogProviderBase.GetOpenMdcMethod">
+            <summary>
+                Returns the provider-specific method to open a mapped diagnostics context.
+            </summary>
+            <returns>A provider-specific method to open a mapped diagnostics context.</returns>
+        </member>
+        <member name="T:Stomp4Net.Logging.LogProviders.LogProviderBase.OpenNdc">
+            <summary>
+                Delegate defining the signature of the method opening a nested diagnostics context.
+            </summary>
+            <param name="message">The message to add to the diagnostics context.</param>
+            <returns>A disposable that when disposed removes the message from the context.</returns>
+        </member>
+        <member name="T:Stomp4Net.Logging.LogProviders.LogProviderBase.OpenMdc">
+            <summary>
+                Delegate defining the signature of the method opening a mapped diagnostics context.
+            </summary>
+            <param name="key">A key.</param>
+            <param name="value">A value.</param>
+            <param name="destructure">Determines whether to call the destructor or not.</param>
+            <returns>A disposable that when disposed removes the map from the context.</returns>
+        </member>
+        <member name="T:Stomp4Net.Logging.LogProviders.LoupeLogProvider.WriteDelegate">
+            <summary>
+                The form of the Loupe Log.Write method we're using
+            </summary>
+        </member>
+        <member name="P:Stomp4Net.Logging.LogProviders.LoupeLogProvider.ProviderIsAvailableOverride">
+            <summary>
+                Gets or sets a value indicating whether [provider is available override]. Used in tests.
+            </summary>
+            <value>
+                <c>true</c> if [provider is available override]; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="T:Stomp4Net.Logging.Logger">
+            <summary>
+            Logger delegate.
+            </summary>
+            <param name="logLevel">The log level</param>
+            <param name="messageFunc">The message function</param>
+            <param name="exception">The exception</param>
+            <param name="formatParameters">The format parameters</param>
+            <returns>A boolean.</returns>
+        </member>
+    </members>
+</doc>

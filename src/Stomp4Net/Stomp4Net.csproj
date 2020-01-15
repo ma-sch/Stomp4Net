@@ -5,6 +5,7 @@
     <Version>1.0.0-alpha001</Version>
     <RepositoryUrl>https://github.com/ma-sch/Stomp4Net</RepositoryUrl>
     <PackageTags>Stomp, Websocket</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

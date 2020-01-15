@@ -28,6 +28,21 @@
             this.ContentLength = this.Headers.ContainsKey("content-length") ? this.Headers["content-length"] : "Not provided by server";
         }
 
+        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.Destination, "/queue/a" },
+            { StompHeaders.MessageId, "007" },
+            { StompHeaders.Subscription, "0" },
+        };
+
+        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.ContentLength, "123" },
+            { StompHeaders.ContentType, "text/plain" },
+            { StompHeaders.Receipt, "message-12345" },
+            { StompHeaders.Ack, "text/plain" },
+        };
+
         public string Destination { get; private set; }
 
         public string MessageId { get; private set; }

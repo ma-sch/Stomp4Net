@@ -19,5 +19,20 @@
             this.Headers[StompHeaders.AcceptVersion] = StompConfig.StompMinProtocolVersion;
             this.Headers[StompHeaders.Host] = host;
         }
+
+        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.AcceptVersion, "1.2" },
+            { StompHeaders.Host, "localhost" },
+        };
+
+        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.ContentLength, "123" },
+            { StompHeaders.ContentType, "text/plain" },
+            { StompHeaders.Login, "SampleUser" },
+            { StompHeaders.Passcode, "SamplePassword" },
+            { StompHeaders.Heartbeat, "0,0" },
+        };
     }
 }

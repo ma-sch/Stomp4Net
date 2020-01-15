@@ -16,6 +16,22 @@
             this.Server = headers.ContainsKey(StompHeaders.Server) ? headers[StompHeaders.Server] : "Not provided by server";
         }
 
+
+        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.Version, "1.2" },
+        };
+
+        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.ContentLength, "123" },
+            { StompHeaders.ContentType, "text/plain" },
+            { StompHeaders.Receipt, "message-12345" },
+            { StompHeaders.Session, "session-12345" },
+            { StompHeaders.Server, "localhost" },
+            { StompHeaders.Heartbeat, "0,0" },
+        };
+
         public string Version
         {
             get

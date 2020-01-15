@@ -20,6 +20,20 @@
             this.Headers["ack"] = ackType;
         }
 
+        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.Id, "0" },
+            { StompHeaders.Destination, "/queue/a" },
+        };
+
+        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.ContentLength, "123" },
+            { StompHeaders.ContentType, "text/plain" },
+            { StompHeaders.Receipt, "message-12345" },
+            { StompHeaders.Ack, "client" },
+        };
+
         public string Destination
         {
             get

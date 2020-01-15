@@ -9,5 +9,17 @@
             : base(StompCommand.Receipt)
         {
         }
+
+        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.ReceiptId, "receipt-12345" },
+        };
+
+        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.ContentLength, "123" },
+            { StompHeaders.ContentType, "text/plain" },
+            { StompHeaders.Receipt, "message-12345" },
+        };
     }
 }

@@ -9,5 +9,16 @@
             : base(StompCommand.Disconnect)
         {
         }
+
+        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
+        {
+        };
+
+        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.ContentLength, "123" },
+            { StompHeaders.ContentType, "text/plain" },
+            { StompHeaders.Receipt, "message-12345" },
+        };
     }
 }

@@ -13,6 +13,19 @@
             this.Headers["content-length"] = body.Length.ToString();
         }
 
+        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.Destination, "/queue/a" },
+        };
+
+        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
+        {
+            { StompHeaders.ContentLength, "123" },
+            { StompHeaders.ContentType, "text/plain" },
+            { StompHeaders.Receipt, "message-12345" },
+            { StompHeaders.Transaction, "message-12345" },
+        };
+
         public string Destination
         {
             get { return this.Headers["destination"]; }

@@ -2,9 +2,9 @@
 {
     using System;
 
-    internal class StompSubscription
+    public class StompSubscription
     {
-        internal StompSubscription(string id, Guid sessionId)
+        internal StompSubscription(string id, string sessionId)
         {
             this.Id = id;
             this.SessionId = sessionId;
@@ -12,6 +12,6 @@
 
         public string Id { get; private set; }
 
-        public Guid SessionId { get; private set; }
+        public string SessionId { get; private set; }
     }
 }

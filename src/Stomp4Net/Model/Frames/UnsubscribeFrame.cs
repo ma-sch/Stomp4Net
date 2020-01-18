@@ -3,23 +3,16 @@
     /// <summary>
     /// Stomp <see cref="https://stomp.github.io/stomp-specification-1.2.html#UNSUBSCRIBE">UNSUBSCRIBE frame</see>.
     /// </summary>
-    public class UnsubscribeFrame : StompFrame
+    public class UnsubscribeFrame : BaseStompFrame<UnsubscribeFrameHeaders>
     {
-        public UnsubscribeFrame()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnsubscribeFrame"/> class.
+        /// </summary>
+        /// <param name="id">Identifies the subscription that should be removed. It must match the subscription identifier of an existing subscription.</param>
+        public UnsubscribeFrame(string id)
             : base(StompCommand.Unsubscribe)
         {
+            this.Headers.Id = id;
         }
-
-        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.Id, "0" },
-        };
-
-        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.ContentLength, "123" },
-            { StompHeaders.ContentType, "text/plain" },
-            { StompHeaders.Receipt, "message-12345" },
-        };
     }
 }

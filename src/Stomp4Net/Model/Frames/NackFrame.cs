@@ -3,24 +3,16 @@
     /// <summary>
     /// Stomp <see cref="https://stomp.github.io/stomp-specification-1.2.html#NACK">NACK frame</see>.
     /// </summary>
-    public class NackFrame : StompFrame
+    public class NackFrame : BaseStompFrame<NackFrameHeaders>
     {
-        public NackFrame()
-            : base(StompCommand.Nack)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NackFrame"/> class.
+        /// </summary>
+        /// <param name="id">Id matching the ack header of the message being not acknowledged.</param>
+        public NackFrame(string id)
+            : base(StompCommand.Ack)
         {
+            this.Headers.Id = id;
         }
-
-        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.Id, "0" },
-        };
-
-        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.ContentLength, "123" },
-            { StompHeaders.ContentType, "text/plain" },
-            { StompHeaders.Receipt, "message-12345" },
-            { StompHeaders.Transaction, "tx1" },
-        };
     }
 }

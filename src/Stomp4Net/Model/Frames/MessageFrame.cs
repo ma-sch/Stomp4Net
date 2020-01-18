@@ -1,4 +1,4 @@
-﻿namespace Stomp4Net.Model
+﻿namespace Stomp4Net.Model.Frames
 {
     using System;
     using Stomp4Net.Exceptions;
@@ -7,48 +7,22 @@
     /// <summary>
     /// Stomp <see cref="https://stomp.github.io/stomp-specification-1.2.html#MESSAGE">MESSAGE frame</see>.
     /// </summary>
-    public class MessageFrame : StompFrame
+    public class MessageFrame : BaseStompFrame<MessageFrameHeaders>
     {
-        public MessageFrame(SendFrame sendFrame, string subscriptionId)
-            : base(StompCommand.Message, sendFrame.Body)
-        {
-            this.Headers["destination"] = sendFrame.Destination;
-            this.Headers["content-type"] = sendFrame.ContentType;
-            this.Headers["subscription"] = subscriptionId;
-            this.Headers["message-id"] = Guid.NewGuid().ToString();
-        }
-
-        public MessageFrame(string body, StompHeaders headers)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageFrame"/> class.
+        /// </summary>
+        /// <param name="destination">Destination where the message is sent to.</param>
+        /// <param name="subscriptionId">Id of the subscription that is receiving the message.</param>
+        /// <param name="body">Content of the message-</param>
+        /// <param name="contentType">Content type of the message</param>
+        public MessageFrame(string destination, string subscriptionId, string body, String contentType)
             : base(StompCommand.Message, body)
         {
-            this.Headers = headers;
-            this.Destination = this.Headers.ContainsKey("destination") ? this.Headers["destination"] : throw new HeaderMissingException("Header 'destination' is missing in MESSAGE frame");
-            this.MessageId = this.Headers.ContainsKey("message-id") ? this.Headers["message-id"] : throw new HeaderMissingException("Header 'message-id' is missing in MESSAGE frame");
-            this.ContentType = this.Headers.ContainsKey("content-type") ? this.Headers["content-type"] : "Not provided by server";
-            this.ContentLength = this.Headers.ContainsKey("content-length") ? this.Headers["content-length"] : "Not provided by server";
+            this.Headers.Destination = destination;
+            this.Headers.ContentType = contentType;
+            this.Headers.Subscription = subscriptionId;
+            this.Headers.MessageId = Guid.NewGuid().ToString();
         }
-
-        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.Destination, "/queue/a" },
-            { StompHeaders.MessageId, "007" },
-            { StompHeaders.Subscription, "0" },
-        };
-
-        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.ContentLength, "123" },
-            { StompHeaders.ContentType, "text/plain" },
-            { StompHeaders.Receipt, "message-12345" },
-            { StompHeaders.Ack, "text/plain" },
-        };
-
-        public string Destination { get; private set; }
-
-        public string MessageId { get; private set; }
-
-        public string ContentType { get; private set; }
-
-        public string ContentLength { get; private set; }
     }
 }

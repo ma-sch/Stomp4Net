@@ -3,7 +3,7 @@
     /// <summary>
     /// Stomp <see cref="https://stomp.github.io/stomp-specification-1.2.html#CONNECT_or_STOMP_Frame">CONNECT frame</see>.
     /// </summary>
-    public class ConnectFrame : StompFrame
+    public class ConnectFrame : BaseStompFrame<ConnectFrameHeaders>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectFrame"/> class.
@@ -16,23 +16,8 @@
         public ConnectFrame(string host)
             : base(StompCommand.Connect)
         {
-            this.Headers[StompHeaders.AcceptVersion] = StompConfig.StompMinProtocolVersion;
-            this.Headers[StompHeaders.Host] = host;
+            this.Headers.AcceptVersion = StompConfig.StompMinProtocolVersion;
+            this.Headers.Host = host;
         }
-
-        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.AcceptVersion, "1.2" },
-            { StompHeaders.Host, "localhost" },
-        };
-
-        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.ContentLength, "123" },
-            { StompHeaders.ContentType, "text/plain" },
-            { StompHeaders.Login, "SampleUser" },
-            { StompHeaders.Passcode, "SamplePassword" },
-            { StompHeaders.Heartbeat, "0,0" },
-        };
     }
 }

@@ -5,7 +5,7 @@
 
     public class SendReceivedEventArgs : EventArgs
     {
-        public SendReceivedEventArgs(Guid sessionId, SendFrame sendFrame)
+        public SendReceivedEventArgs(string sessionId, SendFrame sendFrame)
         {
             this.SessionId = sessionId;
             this.SendFrame = sendFrame;
@@ -13,7 +13,7 @@
 
         public SendFrame SendFrame { get; private set; }
 
-        public Guid SessionId
+        public string SessionId
         {
             get;
         }
@@ -22,7 +22,7 @@
         {
             get
             {
-                return this.SendFrame.Destination;
+                return this.SendFrame.Headers.Destination;
             }
         }
 

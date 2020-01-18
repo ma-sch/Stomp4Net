@@ -3,23 +3,19 @@
     /// <summary>
     /// Stomp <see cref="https://stomp.github.io/stomp-specification-1.2.html#BEGIN">BEGIN frame</see>.
     /// </summary>
-    public class BeginFrame : StompFrame
+    public class BeginFrame : BaseStompFrame<BeginFrameHeaders>
     {
-        public BeginFrame()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BeginFrame"/> class.
+        /// </summary>
+        /// <param name="transaction">The transaction identifier which will be used for SEND, COMMIT, ABORT, ACK, and 
+        /// NACK frames to bind them to the named transaction. Within the same connection, different transactions 
+        /// MUST use different transaction identifiers.
+        /// </param>
+        public BeginFrame(string transaction)
             : base(StompCommand.Begin)
         {
+            this.Headers.Transaction = transaction;
         }
-
-        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.Transaction, "tx1" },
-        };
-
-        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.ContentLength, "123" },
-            { StompHeaders.ContentType, "text/plain" },
-            { StompHeaders.Receipt, "message-12345" },
-        };
     }
 }

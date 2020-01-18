@@ -3,23 +3,16 @@
     /// <summary>
     /// Stomp <see cref="https://stomp.github.io/stomp-specification-1.2.html#ABORT">ABORT frame</see>.
     /// </summary>
-    public class AbortFrame : StompFrame
+    public class AbortFrame : BaseStompFrame<AbortFrameHeaders>
     {
-        public AbortFrame()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbortFrame"/> class.
+        /// </summary>
+        /// <param name="transaction">Identifier of the transaction to abort.</param>
+        public AbortFrame(string transaction)
             : base(StompCommand.Abort)
         {
+            this.Headers.Transaction = transaction;
         }
-
-        public StompHeaders RequiredHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.Transaction, "tx1" },
-        };
-
-        public StompHeaders OptionalHeadersWithSamples { get; } = new StompHeaders()
-        {
-            { StompHeaders.ContentLength, "123" },
-            { StompHeaders.ContentType, "text/plain" },
-            { StompHeaders.Receipt, "message-12345" },
-        };
     }
 }

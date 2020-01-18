@@ -1,7 +1,7 @@
 ﻿namespace Stomp4Net.EventArguments
 {
     using System;
-    using Stomp4Net.Model;
+    using Stomp4Net.Model.Frames;
 
     public class MessageReceivedEventArgs : EventArgs
     {
@@ -16,7 +16,7 @@
         {
             get
             {
-                return this.MessageFrame.Destination;
+                return this.MessageFrame.Headers.Destination;
             }
         }
 

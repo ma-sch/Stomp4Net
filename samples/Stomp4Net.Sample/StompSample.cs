@@ -2,14 +2,16 @@
 {
     using System.Threading;
     using Serilog;
+    using Stomp4Net.Client;
     using Stomp4Net.EventArguments;
     using Stomp4Net.Model;
+    using Stomp4Net.Server;
 
     public class StompSample
     {
         private StompServer stompServer;
 
-        private StompClient stompClient;
+        private StompWebsocketClient stompClient;
 
         public StompSample()
         {
@@ -17,12 +19,13 @@
 
         public void StartServer()
         {
-            this.stompServer = new StompServer(5555);
+            //this.stompServer = new StompWebsocketServer(5555);
+            this.stompServer = new StompTcpServer(5555);
         }
 
         public void StartClient()
         {
-            this.stompClient = new StompClient("localhost:5555/test");
+            this.stompClient = new StompWebsocketClient("localhost:5555/test");
             this.stompClient.Connected += this.Connected;
 
             this.stompClient.Connect();

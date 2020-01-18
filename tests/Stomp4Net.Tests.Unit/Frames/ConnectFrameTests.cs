@@ -18,17 +18,17 @@
         public void CheckRequiredHeaders()
         {
             var connectFrame = new ConnectFrame("TestHost");
-            connectFrame.Headers.Should().Contain(StompHeaders.AcceptVersion, StompConfig.StompMinProtocolVersion);
-            connectFrame.Headers.Should().ContainKey(StompHeaders.Host, "TestHost");
+            connectFrame.Headers.Should().Contain(BaseStompHeaders.AcceptVersionKey, StompConfig.StompMinProtocolVersion);
+            connectFrame.Headers.Should().ContainKey(BaseStompHeaders.HostKey, "TestHost");
         }
 
         [Fact]
         public void CheckOptionalHeaders()
         {
             var connectFrame = new ConnectFrame("TestHost");
-            connectFrame.Headers.Should().Contain(StompHeaders.Login, "User");
-            connectFrame.Headers.Should().ContainKey(StompHeaders.Passcode, "Password");
-            connectFrame.Headers.Should().ContainKey(StompHeaders.Heartbeat, "1000");
+            connectFrame.Headers.Should().Contain(BaseStompHeaders.LoginKey, "User");
+            connectFrame.Headers.Should().ContainKey(BaseStompHeaders.PasscodeKey, "Password");
+            connectFrame.Headers.Should().ContainKey(BaseStompHeaders.HeartbeatKey, "1000");
         }
     }
 }

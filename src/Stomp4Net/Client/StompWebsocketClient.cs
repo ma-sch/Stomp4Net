@@ -1,4 +1,4 @@
-﻿namespace Stomp4Net
+﻿namespace Stomp4Net.Client
 {
     using System;
     using System.Collections.Generic;
@@ -6,27 +6,19 @@
     using System.Threading.Tasks;
     using Stomp4Net.EventArguments;
     using Stomp4Net.Logging;
-    using Stomp4Net.Model;
     using Stomp4Net.Model.Frames;
     using SuperSocket.ClientEngine;
     using WebSocket4Net;
 
-    public class StompClient
+    public class StompWebsocketClient : StompClient
     {
-        private static readonly ILog Log = LogProvider.For<StompClient>();
+        private static readonly ILog Log = LogProvider.For<StompWebsocketClient>();
 
         private WebSocket websocket;
 
-        private bool autoSendPingEnabled = true;
-
-        private int autoSendPingIntervalInMilliseconds = 50;
-
-        private Dictionary<string, Action<object, EventArguments.MessageReceivedEventArgs>> subscriptionCallbacks
-            = new Dictionary<string, Action<object, EventArguments.MessageReceivedEventArgs>>();
-
-        public StompClient(string webSocketUrl)
+        public StompWebsocketClient(string webSocketUrl)
         {
-            this.WebSocketUrl = $"ws://{webSocketUrl}";
+            this.WebSocketUrl = webSocketUrl;
             this.websocket = new WebSocket(this.WebSocketUrl);
 
             this.websocket.MessageReceived += this.OnWebsocketMessageReceived;
@@ -49,7 +41,7 @@
 
         public int AutoReconnectInterval { get; private set; } = 5000;
 
-        public bool AutoSendPingEnabled
+        public override bool AutoSendPingEnabled
         {
             get
             {
@@ -63,7 +55,7 @@
             }
         }
 
-        public int AutoSendPingIntervalInMilliseconds
+        public override int AutoSendPingIntervalInMilliseconds
         {
             get
             {
@@ -77,12 +69,12 @@
             }
         }
 
-        public void Connect()
+        public override void Connect()
         {
             this.ConnectAsync().Wait();
         }
 
-        public async Task ConnectAsync()
+        public override async Task ConnectAsync()
         {
             await this.websocket.OpenAsync();
         }
@@ -131,7 +123,7 @@
         {
             Log.Info($"Websocket message received: {e.Message}");
 
-            var stompFrame = StompFrame.Deserialize(e.Message);
+            var stompFrame = IStompFrame.Deserialize(e.Message);
             switch (stompFrame)
             {
                 case ConnectedFrame frame:
@@ -148,14 +140,14 @@
 
                 case MessageFrame frame:
                     var eventArguments = new EventArguments.MessageReceivedEventArgs(frame);
-                    if (this.subscriptionCallbacks.ContainsKey(frame.Destination))
+                    if (this.subscriptionCallbacks.ContainsKey(frame.Headers.Destination))
                     {
                         var parameters = new object[]
                         {
                             this,
                             eventArguments,
                         };
-                        this.subscriptionCallbacks[frame.Destination].DynamicInvoke(parameters);
+                        this.subscriptionCallbacks[frame.Headers.Destination].DynamicInvoke(parameters);
                     }
                     else
                     {
@@ -172,7 +164,7 @@
             }
         }
 
-        private void SendStompFrame(StompFrame stompFrame)
+        protected override void SendStompFrame(IStompFrame stompFrame)
         {
             var serializedStompFrame = stompFrame.Serialize();
             this.websocket.Send(serializedStompFrame);

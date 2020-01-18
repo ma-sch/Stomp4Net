@@ -1,7 +1,9 @@
 namespace Stomp4Net.Test
 {
     using System.Threading;
+    using Stomp4Net.Client;
     using Stomp4Net.EventArguments;
+    using Stomp4Net.Server;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -17,8 +19,8 @@ namespace Stomp4Net.Test
             [Fact]
             public void ServerAvailable()
             {
-                var stompServer = new StompServer(5555);
-                var stompClient = new StompClient("127.0.0.1:5555");
+                var stompServer = new StompWebsocketServer(5555);
+                var stompClient = new StompWebsocketClient("127.0.0.1:5555");
 
                 var raisedEvent = Assert.RaisesAny<ConnectedEventArgs>(
                     handler => stompClient.Connected += handler,

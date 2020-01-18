@@ -17,7 +17,7 @@
 
             var stompSample = new StompSample();
             stompSample.StartServer();
-            stompSample.StartClient();
+            //stompSample.StartClient();
 
             Console.ReadKey();
         }

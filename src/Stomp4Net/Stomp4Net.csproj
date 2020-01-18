@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Version>1.0.0-alpha001</Version>
     <RepositoryUrl>https://github.com/ma-sch/Stomp4Net</RepositoryUrl>
     <PackageTags>Stomp, Websocket</PackageTags>

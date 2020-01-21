@@ -45,7 +45,11 @@ namespace Stomp4Net.Model.Frames
                     return new StompFrame(headers[BaseStompHeaders.HostKey]);
 
                 case StompCommand.Connected:
-                    return new ConnectedFrame(headers[BaseStompHeaders.VersionKey]);
+                    var connectedFrame = new ConnectedFrame(headers[BaseStompHeaders.VersionKey]);
+                    connectedFrame.Headers.Session = headers.ContainsKey(BaseStompHeaders.SessionKey) ? headers[BaseStompHeaders.SessionKey] : string.Empty;
+                    connectedFrame.Headers.Server = headers.ContainsKey(BaseStompHeaders.ServerKey) ? headers[BaseStompHeaders.ServerKey] : string.Empty;
+                    connectedFrame.Headers.Heartbeat = headers.ContainsKey(BaseStompHeaders.HeartbeatKey) ? headers[BaseStompHeaders.HeartbeatKey] : "0,0";
+                    return connectedFrame;
 
                 case StompCommand.Error:
                     return new ErrorFrame(headers[BaseStompHeaders.MessageKey], body);

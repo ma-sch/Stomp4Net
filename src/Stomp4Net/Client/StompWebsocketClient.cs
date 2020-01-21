@@ -1,9 +1,9 @@
 ﻿namespace Stomp4Net.Client
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Timers;
     using Stomp4Net.EventArguments;
     using Stomp4Net.Logging;
     using Stomp4Net.Model.Frames;
@@ -14,8 +14,16 @@
     {
         private static readonly ILog Log = LogProvider.For<StompWebsocketClient>();
 
-        private WebSocket websocket;
+        private readonly WebSocket websocket;
 
+        private bool websocketHeartbeatEnabled = false;
+
+        private TimeSpan websocketHeartbeatInterval;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StompWebsocketClient"/> class.
+        /// </summary>
+        /// <param name="webSocketUrl">URL of WebSocket server to which the client should connect.</param>
         public StompWebsocketClient(string webSocketUrl)
         {
             this.WebSocketUrl = webSocketUrl;
@@ -27,48 +35,47 @@
             this.websocket.Closed += this.OnWebsocketClosed;
         }
 
-        public event EventHandler<ConnectedEventArgs> Connected;
-
-        public event EventHandler<EventArguments.MessageReceivedEventArgs> MessageReceived;
-
-        public event EventHandler<EventArguments.ReceiptReceivedEventArgs> ReceiptReceived;
-
-        public event EventHandler<EventArguments.ErrorReceivedEventArgs> ErrorReceived;
-
+        /// <summary> Gets the URL of the WebSocket server to which the client connects.</summary>
         public string WebSocketUrl { get; private set; }
 
-        public bool AutoReconnectEnabled { get; private set; } = true;
-
-        public int AutoReconnectInterval { get; private set; } = 5000;
-
-        public override bool AutoSendPingEnabled
+        /// <summary>
+        /// Gets or sets a value indicating whether WebSocket heatbeat is used instead of STOMP heartbeat.
+        /// </summary>
+        public bool WebsocketHeartbeatEnabled
         {
             get
             {
-                return this.autoSendPingEnabled;
+                return this.websocketHeartbeatEnabled;
             }
 
             set
             {
-                this.autoSendPingEnabled = value;
-                this.websocket.EnableAutoSendPing = this.autoSendPingEnabled;
+                this.websocketHeartbeatEnabled = value;
+                this.websocket.EnableAutoSendPing = value;
             }
         }
 
-        public override int AutoSendPingIntervalInMilliseconds
+        /// <summary>
+        /// Gets or sets the interval for Websocket heartbeat. 
+        /// Websocket heartbeat is only used when <see cref="WebsocketHeartbeatEnabled"/> is set.
+        /// </summary>
+        public TimeSpan WebsocketHeartbeatInterval
         {
             get
             {
-                return this.autoSendPingIntervalInMilliseconds;
+                return this.websocketHeartbeatInterval;
             }
 
             set
             {
-                this.autoSendPingIntervalInMilliseconds = value;
-                this.websocket.AutoSendPingInterval = this.autoSendPingIntervalInMilliseconds;
+                this.websocketHeartbeatInterval = value;
+                this.websocket.AutoSendPingInterval = (int)value.TotalMilliseconds;
             }
         }
 
+        /// <summary>
+        /// Connect to Websocket server.
+        /// </summary>
         public override void Connect()
         {
             this.ConnectAsync().Wait();
@@ -100,6 +107,7 @@
         private void OnWebsocketClosed(object sender, EventArgs e)
         {
             Log.Info($"Websocket connection closed");
+            this.HandleLostConnection();
             if (this.AutoReconnectEnabled)
             {
                 Thread.Sleep(this.AutoReconnectInterval);
@@ -110,32 +118,65 @@
         private void OnWebsocketError(object sender, ErrorEventArgs e)
         {
             Log.Error(e.Exception.ToString());
+            this.HandleLostConnection();
         }
 
         private void OnWebsocketOpend(object sender, EventArgs e)
         {
-            Log.Info($"Websocket connection opend");
-            var connectFrame = new ConnectFrame("localhost");
+            Log.Debug($"Websocket connection opend");
+            var connectFrame = new ConnectFrame("localhost")
+            {
+                Headers = new ConnectFrameHeaders()
+                {
+                    AcceptVersion = "1.2",
+                    Host = "localhost",
+                    Heartbeat =
+                        $"{this.StompHeartbeatIntervalFromClientToServer.TotalMilliseconds}," +
+                        $"{this.StompHeartbeatIntervalFromServerToClient.TotalMilliseconds}",
+                },
+            };
             this.SendStompFrame(connectFrame);
         }
 
         private void OnWebsocketMessageReceived(object sender, WebSocket4Net.MessageReceivedEventArgs e)
         {
+            if (e.Message == "\r\n" || e.Message == "\n")
+            {
+                Log.Trace("EOL received");
+                this.StompHeartbeatReceiveTimer?.Stop();
+                this.StompHeartbeatReceiveTimer?.Start();
+                return;
+            }
+
             Log.Info($"Websocket message received: {e.Message}");
 
             var stompFrame = IStompFrame.Deserialize(e.Message);
             switch (stompFrame)
             {
                 case ConnectedFrame frame:
-                    this.Connected?.Invoke(this, new ConnectedEventArgs(frame));
+                    if (frame.ServerExpectedHeartbeatInterval.TotalMilliseconds != 0)
+                    {
+                        this.StompHeartbeatSendTimer = new System.Timers.Timer(frame.ServerExpectedHeartbeatInterval.TotalMilliseconds);
+                        this.StompHeartbeatSendTimer.Elapsed += this.HeartbeatSendTimerElapsed;
+                        this.StompHeartbeatSendTimer.Start();
+                    }
+
+                    if (frame.ServerSendingHeartbeatInterval.TotalMilliseconds != 0)
+                    {
+                        this.StompHeartbeatReceiveTimer = new System.Timers.Timer((this.StompHeartbeatIntervalFromServerToClient + this.StompHeartbeatTimeout).TotalMilliseconds);
+                        this.StompHeartbeatReceiveTimer.Elapsed += this.HeartbeatReceivedTimerElapsed;
+                        this.StompHeartbeatReceiveTimer.Start();
+                    }
+
+                    this.InvokeConnectedEvent(new ConnectedEventArgs(frame));
                     break;
 
                 case ErrorFrame frame:
-                    this.ErrorReceived?.Invoke(this, new ErrorReceivedEventArgs(frame));
+                    this.InvokeErrorReceivedEvent(new ErrorReceivedEventArgs(frame));
                     break;
 
                 case ReceiptFrame frame:
-                    this.ReceiptReceived?.Invoke(this, new ReceiptReceivedEventArgs(frame));
+                    this.InvokeReceiptReceivedEvent(new ReceiptReceivedEventArgs(frame));
                     break;
 
                 case MessageFrame frame:
@@ -151,9 +192,7 @@
                     }
                     else
                     {
-                        this.MessageReceived?.Invoke(
-                            this,
-                            eventArguments);
+                        this.InvokeMessageReceivedEvent(eventArguments);
                     }
 
                     break;
@@ -162,12 +201,39 @@
                     Log.Info($"Unkown stomp frame: {stompFrame.Body}");
                     break;
             }
+
+            this.StompHeartbeatReceiveTimer?.Stop();
+            this.StompHeartbeatReceiveTimer?.Start();
+        }
+
+        private void HeartbeatSendTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            this.SendEOL();
+        }
+
+        private void HeartbeatReceivedTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            this.HandleLostConnection();
         }
 
         protected override void SendStompFrame(IStompFrame stompFrame)
         {
             var serializedStompFrame = stompFrame.Serialize();
             this.websocket.Send(serializedStompFrame);
+        }
+
+        protected override void SendEOL()
+        {
+            Log.Trace("Sending EOL");
+            this.websocket.Send("\r\n");
+        }
+
+        private void HandleLostConnection()
+        {
+            Log.Error("Connection to server lost");
+            this.StompHeartbeatSendTimer?.Stop();
+            this.StompHeartbeatReceiveTimer?.Stop();
+            this.InvokeDisconnectedEvent(new DisconnectedEventArgs());
         }
     }
 }

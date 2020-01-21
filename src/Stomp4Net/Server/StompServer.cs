@@ -19,6 +19,12 @@
         protected Dictionary<string, Action<object, SendReceivedEventArgs>> notificationForDestinationCallbacks
             = new Dictionary<string, Action<object, SendReceivedEventArgs>>();
 
+        protected Dictionary<string, Timer> sessionIdToHeartbeatSendTimers = new Dictionary<string, Timer>();
+        protected Dictionary<Timer, string> heartbeatSendTimersToSessionId = new Dictionary<Timer, string>();
+
+        protected Dictionary<string, Timer> sessionIdToHeartbeatReceivedTimers = new Dictionary<string, Timer>();
+        protected Dictionary<Timer, string> heartbeatReceivedTimersToSessionId = new Dictionary<Timer, string>();
+
         public StompServer(int port)
         {
             this.Port = port;
@@ -32,25 +38,98 @@
 
         public int Port { get; set; }
 
+        public TimeSpan StompHeartbeatIntervalFromClientToServer { get; set; } = TimeSpan.FromMilliseconds(10000);
+
+        public TimeSpan StompHeartbeatIntervalFromServerToClient { get; set; } = TimeSpan.FromMilliseconds(10000);
+
+        public TimeSpan StompHeartbeatTimeout { get; set; } = TimeSpan.FromMilliseconds(5000);
+
         public void ProcessMessage(string sessionId, string messageString)
         {
+            if (messageString == "\r\n")
+            {
+                Log.Trace("EOL received");
+                if (this.sessionIdToHeartbeatReceivedTimers.ContainsKey(sessionId))
+                {
+                    var heartbeatReceiveTimerToResett = this.sessionIdToHeartbeatReceivedTimers[sessionId];
+                    heartbeatReceiveTimerToResett.Stop();
+                    heartbeatReceiveTimerToResett.Start();
+                }
+                return;
+            }
+
             Log.Debug($"Message received from client '{sessionId}': {messageString}");
 
             var stompFrame = IStompFrame.Deserialize(messageString);
             switch (stompFrame)
             {
                 case ConnectFrame frame:
-                case StompFrame frame1:
                     var version = "1.2";
                     var connectedFrame = new ConnectedFrame(version)
                     {
                         Headers = new ConnectedFrameHeaders()
                         {
-                            Version = "1.2",
+                            Version = version,
                             Session = sessionId,
                             Server = "Stomp4Net/1.0.0",
+                            Heartbeat = $"{this.StompHeartbeatIntervalFromServerToClient.TotalMilliseconds},{this.StompHeartbeatIntervalFromClientToServer.TotalMilliseconds}",
                         },
                     };
+
+                    if (frame.ClientExpectedHeartbeatInterval.TotalMilliseconds != 0)
+                    {
+                        var heartbeatSendTimer = new Timer(this.StompHeartbeatIntervalFromServerToClient.TotalMilliseconds);
+                        heartbeatSendTimer.Elapsed += this.SendHeartbeatTimerElapsed;
+                        heartbeatSendTimer.Start();
+                        this.sessionIdToHeartbeatSendTimers.Add(sessionId, heartbeatSendTimer);
+                        this.heartbeatSendTimersToSessionId.Add(heartbeatSendTimer, sessionId);
+                    }
+
+                    if (frame.ClientExpectedHeartbeatInterval.TotalMilliseconds != 0)
+                    {
+                        var heartbeatReceiveTimer = new Timer(
+                            (this.StompHeartbeatIntervalFromServerToClient + this.StompHeartbeatTimeout).TotalMilliseconds);
+                        heartbeatReceiveTimer.Elapsed += this.ReceiveHeartbeatTimerElapsed;
+                        heartbeatReceiveTimer.Start();
+                        this.sessionIdToHeartbeatReceivedTimers.Add(sessionId, heartbeatReceiveTimer);
+                        this.heartbeatReceivedTimersToSessionId.Add(heartbeatReceiveTimer, sessionId);
+                    }
+
+                    this.SendStompFrame(sessionId, connectedFrame);
+                    this.ClientConnected?.Invoke(this, new ClientConnectedEventArgs(sessionId));
+                    break;
+
+                case StompFrame frame:
+                    version = "1.2";
+                    connectedFrame = new ConnectedFrame(version)
+                    {
+                        Headers = new ConnectedFrameHeaders()
+                        {
+                            Version = version,
+                            Session = sessionId,
+                            Server = "Stomp4Net/1.0.0",
+                            Heartbeat = $"{this.StompHeartbeatIntervalFromServerToClient.TotalMilliseconds},{this.StompHeartbeatIntervalFromClientToServer.TotalMilliseconds}",
+                        },
+                    };
+
+                    if (frame.ClientExpectedHeartbeatInterval.TotalMilliseconds != 0)
+                    {
+                        var heartbeatSendTimer = new Timer(this.StompHeartbeatIntervalFromServerToClient.TotalMilliseconds);
+                        heartbeatSendTimer.Elapsed += this.SendHeartbeatTimerElapsed;
+                        heartbeatSendTimer.Start();
+                        this.sessionIdToHeartbeatSendTimers.Add(sessionId, heartbeatSendTimer);
+                        this.heartbeatSendTimersToSessionId.Add(heartbeatSendTimer, sessionId);
+                    }
+
+                    if (frame.ClientExpectedHeartbeatInterval.TotalMilliseconds != 0)
+                    {
+                        var heartbeatReceiveTimer = new Timer(
+                            (this.StompHeartbeatIntervalFromServerToClient + this.StompHeartbeatTimeout).TotalMilliseconds);
+                        heartbeatReceiveTimer.Elapsed += this.ReceiveHeartbeatTimerElapsed;
+                        heartbeatReceiveTimer.Start();
+                        this.sessionIdToHeartbeatReceivedTimers.Add(sessionId, heartbeatReceiveTimer);
+                        this.heartbeatReceivedTimersToSessionId.Add(heartbeatReceiveTimer, sessionId);
+                    }
 
                     this.SendStompFrame(sessionId, connectedFrame);
                     this.ClientConnected?.Invoke(this, new ClientConnectedEventArgs(sessionId));
@@ -109,6 +188,36 @@
                     Log.Warn($"Unkown frame: {messageString}");
                     break;
             }
+
+            if (this.sessionIdToHeartbeatReceivedTimers.ContainsKey(sessionId))
+            {
+                var heartbeatReceiveTimerToReset = this.sessionIdToHeartbeatReceivedTimers[sessionId];
+                heartbeatReceiveTimerToReset.Stop();
+                heartbeatReceiveTimerToReset.Start();
+            }
+        }
+
+        private void SendHeartbeatTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            var timer = (Timer)sender;
+            var sessionId = this.heartbeatSendTimersToSessionId[timer];
+            this.SendEOL(sessionId);
+        }
+
+        private void ReceiveHeartbeatTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            var heartbeatReceiveTimer = (Timer)sender;
+            var sessionId = this.heartbeatReceivedTimersToSessionId[heartbeatReceiveTimer];
+            heartbeatReceiveTimer.Stop();
+            this.heartbeatReceivedTimersToSessionId.Remove(heartbeatReceiveTimer);
+            this.sessionIdToHeartbeatReceivedTimers.Remove(sessionId);
+
+            var heartbeatSendTimer = this.sessionIdToHeartbeatSendTimers[sessionId];
+            heartbeatSendTimer.Stop();
+            this.heartbeatSendTimersToSessionId.Remove(heartbeatSendTimer);
+            this.sessionIdToHeartbeatSendTimers.Remove(sessionId);
+            Log.Error($"Connection to client '{sessionId}' lost");
+            this.ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(sessionId));
         }
 
         public void EnableNotificationForDestination(string topic, Action<object, SendReceivedEventArgs> callback)
@@ -128,12 +237,19 @@
         {
         }
 
-        public void PublishMessageForSession(string sessionId, string message, string destination = "", string subscriptionId = "")
+        public void PublishMessageForSession(string sessionId, string destination, string message, string subscriptionId = "")
         {
             var messageFrame = new MessageFrame(destination, subscriptionId, message, ContentType.ApplicationJson);
             this.SendStompFrame(sessionId, messageFrame);
         }
 
         protected abstract void SendStompFrame(string sessionId, IStompFrame stompFrame);
+
+        protected abstract void SendEOL(string sessionId);
+
+        protected void InvokeClientDisconnected(string sessionId)
+        {
+            this.ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(sessionId));
+        }
     }
 }

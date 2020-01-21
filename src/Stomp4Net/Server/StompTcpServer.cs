@@ -56,7 +56,7 @@
                 var stream = client.GetStream();
                 string imei = string.Empty;
                 string data = null;
-                byte[] bytes = new byte[256];
+                byte[] bytes = new byte[4096];
                 int i;
                 try
                 {
@@ -70,8 +70,8 @@
                 catch (Exception e)
                 {
                     Log.Debug($"Exception: {e.ToString()}");
-                    client.
-                    Close();
+                    client.Close();
+                    this.InvokeClientDisconnected(sessionId);
                 }
             };
         }
@@ -81,8 +81,17 @@
             var client = tcpClients[sessionId];
             var stream = client.GetStream();
 
-            byte[] reply = Encoding.ASCII.GetBytes(stompFrame.Serialize());
-            stream.Write(reply, 0, reply.Length);
+            byte[] message = Encoding.ASCII.GetBytes(stompFrame.Serialize());
+            stream.Write(message, 0, message.Length);
+        }
+
+        protected override void SendEOL(string sessionId)
+        {
+            var client = tcpClients[sessionId];
+            var stream = client.GetStream();
+
+            byte[] message = Encoding.ASCII.GetBytes("\r\n");
+            stream.Write(message, 0, message.Length);
         }
     }
 }

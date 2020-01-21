@@ -49,12 +49,27 @@
         {
             if (this.ContainsKey(headerKey))
             {
-                return this[headerKey];
+                switch (headerKey)
+                {
+                    case HeartbeatKey:
+                        var heartbeat = this[headerKey].Equals(string.Empty) ? "0,0" : this[headerKey];
+                        return heartbeat;
+
+                    default:
+                        return this[headerKey];
+                }
             }
             else
             {
-                return null;
-                //throw new HeaderNotSetException();
+                switch (headerKey)
+                {
+                    case HeartbeatKey:
+                        return "0,0";
+
+                    default:
+                        return null;
+                        //throw new HeaderNotSetException();
+                }
             }
         }
 

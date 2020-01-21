@@ -1,6 +1,5 @@
 ﻿namespace Stomp4Net.Model
 {
-    using System.IO;
     using System.Text;
     using Stomp4Net.Logging;
     using Stomp4Net.Model.Frames;

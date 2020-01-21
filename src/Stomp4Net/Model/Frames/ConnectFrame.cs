@@ -1,4 +1,6 @@
-﻿namespace Stomp4Net.Model.Frames
+﻿using System;
+
+namespace Stomp4Net.Model.Frames
 {
     /// <summary>
     /// Stomp <see cref="https://stomp.github.io/stomp-specification-1.2.html#CONNECT_or_STOMP_Frame">CONNECT frame</see>.
@@ -18,6 +20,30 @@
         {
             this.Headers.AcceptVersion = StompConfig.StompMinProtocolVersion;
             this.Headers.Host = host;
+        }
+
+        /// <summary>
+        /// Gets the interval the client will send heartbeats.
+        /// </summary>
+        public TimeSpan ClientSendingHeartbeatInterval
+        {
+            get
+            {
+                var interval = int.Parse(this.Headers.Heartbeat.Split(",")[0]);
+                return TimeSpan.FromMilliseconds(interval);
+            }
+        }
+
+        /// <summary>
+        /// Gets the heartbeat interval expected by the client.
+        /// </summary>
+        public TimeSpan ClientExpectedHeartbeatInterval
+        {
+            get
+            {
+                var interval = int.Parse(this.Headers.Heartbeat.Split(",")[1]);
+                return TimeSpan.FromMilliseconds(interval);
+            }
         }
     }
 }

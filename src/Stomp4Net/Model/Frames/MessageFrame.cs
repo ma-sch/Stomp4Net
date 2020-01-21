@@ -1,8 +1,6 @@
 ﻿namespace Stomp4Net.Model.Frames
 {
     using System;
-    using Stomp4Net.Exceptions;
-    using Stomp4Net.Model.Frames;
 
     /// <summary>
     /// Stomp <see cref="https://stomp.github.io/stomp-specification-1.2.html#MESSAGE">MESSAGE frame</see>.

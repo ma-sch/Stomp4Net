@@ -3,15 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Timers;
     using Fleck;
     using Stomp4Net.Logging;
     using Stomp4Net.Model.Frames;
 
     public class StompWebsocketServer : StompServer
     {
-        private const double ConnectionTimeout = 5000;
-
         private static readonly ILog Log = LogProvider.For<StompWebsocketServer>();
 
         private WebSocketServer server;
@@ -19,8 +16,6 @@
         private IWebSocketConnection websocket;
 
         private Dictionary<string, IWebSocketConnection> clients = new Dictionary<string, IWebSocketConnection>();
-
-        private Dictionary<string, Timer> pingTimers = new Dictionary<string, Timer>();
 
         public StompWebsocketServer(int port)
             : base(port)
@@ -50,13 +45,6 @@
 
                     this.ConnectionClosed(socket);
                 };
-                socket.OnPing = (byte[] message) =>
-                {
-                    Log.Info("Ping received");
-                    var pingTimer = this.pingTimers[socket.ConnectionInfo.Id.ToString()];
-                    pingTimer.Stop();
-                    pingTimer.Start();
-                };
             });
             Log.Info($"WebSocket server listening on port '{port}'");
         }
@@ -66,11 +54,6 @@
             Log.Debug($"New connection opend from '{newConnection.ConnectionInfo.ClientIpAddress}'");
             var clientId = newConnection.ConnectionInfo.Id.ToString();
             this.clients.Add(clientId, newConnection);
-
-            var pingTimer = new Timer(ConnectionTimeout);
-            pingTimer.Elapsed += this.PingResponseTimeExceeded;
-            pingTimer.Start();
-            this.pingTimers.Add(clientId, pingTimer);
         }
 
         public void ConnectionClosed(IWebSocketConnection closedConnection)
@@ -80,7 +63,7 @@
         public void MessageReceived(IWebSocketConnection receivingConnection, string messageString)
         {
             var sessionId = receivingConnection.ConnectionInfo.Id;
-            Log.Debug($"Websocket message received from client '{sessionId}': {messageString}");
+            Log.Trace($"Websocket message received from client '{sessionId}': {messageString}");
             this.ProcessMessage(sessionId.ToString(), messageString);
         }
 
@@ -88,6 +71,13 @@
         {
             var websocketConnection = this.clients[sessionId];
             websocketConnection.Send(stompFrame.Serialize());
+        }
+
+        protected override void SendEOL(string sessionId)
+        {
+            Log.Trace($"Sending EOL to '{sessionId}'");
+            var websocketConnection = this.clients[sessionId];
+            websocketConnection.Send("\r\n");
         }
     }
 }

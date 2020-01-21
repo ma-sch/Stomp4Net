@@ -1,7 +1,5 @@
 ﻿namespace Stomp4Net.Model
 {
-    using System;
-
     public class StompSubscription
     {
         internal StompSubscription(string id, string sessionId)
